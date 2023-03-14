@@ -37,6 +37,11 @@ public class VideoController {
         return "upload";
     }
 
+    @GetMapping("/process")
+    public String process() {
+        return "process";
+    }
+
     private final String bucketName = "aws-us-east-1-tcc-video";
 
     //Diferente do original boa parte da classe
