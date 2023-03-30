@@ -1,5 +1,10 @@
-package com.example.video;
+package com.example.video.controller;
 
+    import com.example.video.util.S3Service;
+    import com.example.video.util.SendMessages;
+    import com.example.video.util.VideoDetectFaces;
+    import com.example.video.item.FaceItems;
+    import com.example.video.util.WriteExcel;
     import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
     import org.springframework.stereotype.Controller;
@@ -48,7 +53,7 @@ public class VideoController {
     @GetMapping("/getvideo")
     @ResponseBody
     String getImages(){
-        return s3Client.ListAllObjects("scottexamplevideo");
+        return s3Client.ListAllObjects(bucketName);
     }
 
     // Upload a MP4 to an Amazon S3 bucket
@@ -70,20 +75,24 @@ public class VideoController {
     }
 
     // generates a report after analyzing a video in an Amazon S3 bucket
-    @PostMapping("/report")
+    @PostMapping(value = "/report")
+    @ResponseBody
     public String report(HttpServletRequest request){
 
         String email = request.getParameter("email");
         String myKey = s3Client.getKeyName(bucketName);
         String jobNum = detectFaces.StartFaceDetection(bucketName, myKey);
         List<FaceItems> items = detectFaces.GetFaceResults(jobNum);
+
         InputStream excelDate = excel.exportExcel(items);
 
         try{
             sendMessage.sendReport(excelDate, email);
+
         } catch (Exception e ){
             e.printStackTrace();
         }
+
         return "The "+ myKey +" video has been successfully analyzed and the report is sent to "+email;
     }
 }

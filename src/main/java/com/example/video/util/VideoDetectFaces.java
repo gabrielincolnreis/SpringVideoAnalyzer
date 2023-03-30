@@ -1,5 +1,6 @@
-package com.example.video;
+package com.example.video.util;
 
+import com.example.video.item.FaceItems;
 import org.springframework.stereotype.Component;
 import software.amazon.awssdk.auth.credentials.EnvironmentVariableCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
@@ -70,15 +71,19 @@ public class VideoDetectFaces {
         try {
 
             RekognitionClient rekognitionClient = getRecClient();
+            String paginationToken=null;
             GetFaceDetectionResponse faceDetectionResponse = null;
             boolean finished = false;
             String status = "";
             int counter = 0;
 
             do {
+                if (faceDetectionResponse !=null)
+                    paginationToken = faceDetectionResponse.nextToken();
+
                 GetFaceDetectionRequest recognitionRequest = GetFaceDetectionRequest.builder()
                         .jobId(startJobId)
-                        .nextToken(null)
+                        .nextToken(paginationToken)
                         .maxResults(10)
                         .build();
 

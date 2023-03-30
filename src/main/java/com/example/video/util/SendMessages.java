@@ -1,50 +1,40 @@
-package com.example.video;
+package com.example.video.util;
 
 import org.apache.commons.io.IOUtils;
-import org.springframework.stereotype.Component;
 import software.amazon.awssdk.auth.credentials.EnvironmentVariableCredentialsProvider;
-import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ses.SesClient;
-import software.amazon.awssdk.services.ses.model.RawMessage;
-import software.amazon.awssdk.services.ses.model.SendRawEmailRequest;
-import software.amazon.awssdk.services.ses.model.SesException;
-
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+import javax.mail.internet.MimeBodyPart;
 import javax.mail.util.ByteArrayDataSource;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.Properties;
+import software.amazon.awssdk.core.SdkBytes;
+import software.amazon.awssdk.services.ses.model.SendRawEmailRequest;
+import software.amazon.awssdk.services.ses.model.RawMessage;
+import software.amazon.awssdk.services.ses.model.SesException;
+import org.springframework.stereotype.Component;
 
 @Component
 public class SendMessages {
 
-    private String sender = "gabrielincoln17@gmail.com";
+    public void sendReport(InputStream is, String emailAddress ) throws IOException {
 
-    // The subject line for the email.
-    private String subject = "Analyzed Video report";
-
-    // The email body for recipients with non-HTML email clients.
-    private String bodyText = "Hello,\r\n" + "Please see the attached file for the analyzed video report.";
-
-
-    public void sendReport(InputStream is, String emailAddress) throws IOException {
-
-        // Convert the InputStream to a byte[]
+        //Convert the InputStream to a byte[]
         byte[] fileContent = IOUtils.toByteArray(is);
 
         try {
-            send(fileContent, emailAddress);
+            send(fileContent,emailAddress);
         } catch (MessagingException e) {
             e.getStackTrace();
         }
@@ -55,45 +45,53 @@ public class SendMessages {
         MimeMessage message = null;
         Session session = Session.getDefaultInstance(new Properties());
 
-        // Create a new MimeMessage object
+        // Create a new MimeMessage object.
         message = new MimeMessage(session);
 
-        //Add subject, from, and to lines
+        // Add subject, from and to lines.
+        // The subject line for the email.
+        String subject = "Analyzed Video report";
         message.setSubject(subject, "UTF-8");
+        String sender = "gabrielincoln17@gmail.com";
         message.setFrom(new InternetAddress(sender));
         message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(emailAddress));
 
-        //Create a multipar/alternative child container
+        // Create a multipart/alternative child container.
         MimeMultipart msgBody = new MimeMultipart("alternative");
 
-        //Create a wrapper for the HTML and text parts
+        // Create a wrapper for the HTML and text parts.
         MimeBodyPart wrap = new MimeBodyPart();
 
-        //Define the text part
+        // Define the text part.
         MimeBodyPart textPart = new MimeBodyPart();
+        // The email body for recipients with non-HTML email clients.
+        String bodyText = "Hello,\r\n" + "Please see the attached file for the analyzed video report.";
         textPart.setContent(bodyText, "text/plain; charset=UTF-8");
 
-        //Define the HTML part
+        // Define the HTML part.
         MimeBodyPart htmlPart = new MimeBodyPart();
-        htmlPart.setContent(htmlPart, "text/html; charset=UTF-8");
+        // The HTML body of the email.
+        String bodyHTML = "<html>" + "<head></head>" + "<body>" + "<h1>Hello!</h1>"
+                + "<p>Please see the attached file for the report that analyzed a video in the Amazon S3 bucket.</p>" + "</body>" + "</html>";
+        htmlPart.setContent(bodyHTML, "text/html; charset=UTF-8");
 
-        // Add the text and HTML parts to the child container
+        // Add the text and HTML parts to the child container.
         msgBody.addBodyPart(textPart);
         msgBody.addBodyPart(htmlPart);
 
-        // Add the child container to the wrapper object
+        // Add the child container to the wrapper object.
         wrap.setContent(msgBody);
 
-        //Create a multipart/mixed parent container
+        // Create a multipart/mixed parent container.
         MimeMultipart msg = new MimeMultipart("mixed");
 
-        // Add the parent container to the message
+        // Add the parent container to the message.
         message.setContent(msg);
 
-        // Add the multipart/alternative part to the message
+        // Add the multipart/alternative part to the message.
         msg.addBodyPart(wrap);
 
-        //Define the attachment
+        // Define the attachment
         MimeBodyPart att = new MimeBodyPart();
         DataSource fds = new ByteArrayDataSource(attachment, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         att.setDataHandler(new DataHandler(fds));
@@ -101,10 +99,10 @@ public class SendMessages {
         String reportName = "VideoReport.xls";
         att.setFileName(reportName);
 
-        //Add the attachment to the message
+        // Add the attachment to the message.
         msg.addBodyPart(att);
 
-        // Try to send the email
+        // Try to send the email.
         try {
             System.out.println("Attempting to send an email through Amazon SES " + "using the AWS SDK for Java...");
 
@@ -116,9 +114,10 @@ public class SendMessages {
 
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             message.writeTo(outputStream);
-            ByteBuffer buffer = ByteBuffer.wrap(outputStream.toByteArray());
-            byte[] arr = new byte[buffer.remaining()];
-            buffer.get(arr);
+
+            ByteBuffer buf = ByteBuffer.wrap(outputStream.toByteArray());
+            byte[] arr = new byte[buf.remaining()];
+            buf.get(arr);
 
             SdkBytes data = SdkBytes.fromByteArray(arr);
             RawMessage rawMessage = RawMessage.builder()
@@ -130,10 +129,11 @@ public class SendMessages {
                     .build();
 
             client.sendRawEmail(rawEmailRequest);
+
         } catch (SesException e) {
             System.err.println(e.awsErrorDetails().errorMessage());
             System.exit(1);
         }
-        System.out.println("Email sent with attachment.");
+        System.out.println("Email sent with attachment");
     }
 }
