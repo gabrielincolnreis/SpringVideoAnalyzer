@@ -25,7 +25,7 @@ import software.amazon.awssdk.services.ses.model.RawMessage;
 import software.amazon.awssdk.services.ses.model.SesException;
 import org.springframework.stereotype.Component;
 
-@Component
+//@Component
 public class SendMessages {
 
     public void sendReport(InputStream is, String emailAddress ) throws IOException {

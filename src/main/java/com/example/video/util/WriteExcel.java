@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Locale;
 
 //Da para criar com tecnologias mais novas?????
-@Component
+//@Component
 public class WriteExcel {
 
     private WritableCellFormat timesBoldUnderline;

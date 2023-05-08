@@ -1,14 +1,14 @@
 package com.example.video.controller;
 
-    import com.example.video.util.S3Service;
-    import com.example.video.util.SendMessages;
-    import com.example.video.util.VideoDetectFaces;
-    import com.example.video.item.FaceItems;
-    import com.example.video.util.WriteExcel;
-    import jakarta.servlet.http.HttpServletRequest;
+import com.example.video.util.S3Service;
+import com.example.video.util.SendMessages;
+import com.example.video.util.VideoDetectFaces;
+import com.example.video.item.FaceItems;
+import com.example.video.util.WriteExcel;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-    import org.springframework.stereotype.Controller;
-    import org.springframework.web.bind.annotation.*;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
@@ -17,7 +17,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
-@Controller
+//@Controller
+//@RequestMapping("/video")
 public class VideoController {
 
     @Autowired
