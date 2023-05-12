@@ -11,7 +11,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.0.4</version>
+        <version>3.0.5</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <properties>
@@ -94,12 +94,12 @@
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-dynamodb</artifactId>
-            <version>1.11.664</version>
+            <version>1.12.85</version>
         </dependency>
         <dependency>
             <groupId>com.github.derjust</groupId>
             <artifactId>spring-data-dynamodb</artifactId>
-            <version>5.1.0</version>
+            <version>5.0.4</version>
         </dependency>
     </dependencies>
     <build>

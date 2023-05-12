@@ -1,12 +1,19 @@
 package com.example.services;
 
 import com.example.model.Customer;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
+import org.springframework.http.ResponseEntity;
 
-import java.util.List;
-@Service
+import java.util.Optional;
+
 public interface CustomerService {
 
     Customer save(Customer customer);
+
+    Iterable<Customer> getAll();
+
+    ResponseEntity<? extends Object> delete(String id);
+
+    Optional<Customer> findById(String id);
+
+    ResponseEntity<Object> update(Customer customer, String id);
 }

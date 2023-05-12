@@ -15,7 +15,7 @@ import org.springframework.context.annotation.Configuration;
 
 @RequiredArgsConstructor
 @Configuration
-@EnableDynamoDBRepositories(basePackages = "com.example.employee.repository")
+@EnableDynamoDBRepositories(basePackages = "com.example.repositories")
 public class DynamoDbConfig {
 
     private final AwsConfig config;
