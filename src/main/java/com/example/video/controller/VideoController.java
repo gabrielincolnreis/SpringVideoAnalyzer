@@ -1,13 +1,10 @@
 package com.example.video.controller;
 
-import com.example.video.util.S3Service;
-import com.example.video.util.SendMessages;
-import com.example.video.util.VideoDetectFaces;
+import com.example.video.util.*;
 import com.example.video.item.FaceItems;
-import com.example.video.util.WriteExcel;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
@@ -17,8 +14,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
-//@Controller
-//@RequestMapping("/video")
+@RestController
+@RequestMapping("/video")
 public class VideoController {
 
     @Autowired
@@ -32,6 +29,9 @@ public class VideoController {
 
     @Autowired
     VideoDetectFaces detectFaces;
+
+    @Autowired
+    CompareFaces compareFaces;
 
     @GetMapping("/")
     public String root() {
@@ -95,6 +95,14 @@ public class VideoController {
         }
 
         return "The "+ myKey +" video has been successfully analyzed and the report is sent to "+email;
+    }
+
+    @PostMapping(value = "/compareFaces")
+    @ResponseBody
+    public ResponseEntity<?> compareFaces(
+            @RequestParam("image1") MultipartFile image1
+    ) throws IOException {
+        return compareFaces.compareFaces(image1.getInputStream());
     }
 }
 

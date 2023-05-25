@@ -27,5 +27,5 @@ public class Customer {
     public String email;
 
     @DynamoDBAttribute
-    public List<Image> faces;
+    public String url_face;
 }

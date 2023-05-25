@@ -10,7 +10,7 @@ import software.amazon.awssdk.services.rekognition.model.*;
 import java.util.ArrayList;
 import java.util.List;
 
-//@Component
+@Component
 public class VideoDetectFaces {
 
     String topicArn = "arn:aws:sns:us-east-1:967567166871:AmazonRekognition";

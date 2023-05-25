@@ -1,8 +1,10 @@
 package com.example.video.util;
 
 import com.example.video.item.BucketItem;
-import org.springframework.stereotype.Component;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import software.amazon.awssdk.auth.credentials.EnvironmentVariableCredentialsProvider;
@@ -18,17 +20,19 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import java.io.IOException;
 import java.io.StringWriter;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-//@Component
+@Component
 public class S3Service {
 
     private  S3Client s3 ;
-    private S3Client getClient() {
+    String bucketName = "tcc-imagens";
+    public static S3Client getClient() {
 
         Region region = Region.US_EAST_1;
 
@@ -66,6 +70,29 @@ public class S3Service {
             System.exit(1);
         }
         return "";
+    }
+
+    public ResponseEntity<?> addObject(MultipartFile faces) throws IOException {
+
+        byte[] data = faces.getBytes();
+        String objectKey = faces.getOriginalFilename();
+        s3 = getClient();
+
+        try {
+
+            PutObjectResponse response = s3.putObject(PutObjectRequest.builder()
+                            .bucket(bucketName)
+                            .key(objectKey)
+                            .build(),
+                    RequestBody.fromBytes(data));
+
+            return ResponseEntity.ok("Adicionado ao S3");
+
+        } catch (S3Exception e) {
+            System.err.println(e.getMessage());
+            System.exit(1);
+        }
+        return ResponseEntity.badRequest().build();
     }
 
     public void deleteFile(String objectName, String bucketName){

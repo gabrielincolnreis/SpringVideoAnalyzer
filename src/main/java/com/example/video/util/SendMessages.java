@@ -1,6 +1,7 @@
 package com.example.video.util;
 
 import org.apache.commons.io.IOUtils;
+import org.springframework.stereotype.Component;
 import software.amazon.awssdk.auth.credentials.EnvironmentVariableCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ses.SesClient;
@@ -23,9 +24,8 @@ import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.ses.model.SendRawEmailRequest;
 import software.amazon.awssdk.services.ses.model.RawMessage;
 import software.amazon.awssdk.services.ses.model.SesException;
-import org.springframework.stereotype.Component;
 
-//@Component
+@Component
 public class SendMessages {
 
     public void sendReport(InputStream is, String emailAddress ) throws IOException {
