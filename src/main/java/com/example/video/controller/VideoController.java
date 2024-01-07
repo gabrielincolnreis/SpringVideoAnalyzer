@@ -97,12 +97,12 @@ public class VideoController {
         return "The "+ myKey +" video has been successfully analyzed and the report is sent to "+email;
     }
 
-    @PostMapping(value = "/compareFaces")
+    @PostMapping(value = "/compareFaces/{s3Image}")
     @ResponseBody
     public ResponseEntity<?> compareFaces(
-            @RequestParam("image1") MultipartFile image1
-    ) throws IOException {
-        return compareFaces.compareFaces(image1.getInputStream());
+            @RequestParam("image1") MultipartFile image1,
+            @PathVariable("s3Image") String s3Image) throws IOException {
+        return compareFaces.compareFaces(image1.getInputStream(), s3Image);
     }
 }
 

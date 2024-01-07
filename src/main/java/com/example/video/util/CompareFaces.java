@@ -19,7 +19,6 @@ import java.util.List;
 @Component
 public class CompareFaces {
 
-
     String bucketName = "tcc-imagens";
 
     private RekognitionClient getRecClient() {
@@ -30,26 +29,27 @@ public class CompareFaces {
                 .build();
     }
 
-    public ResponseEntity<?> compareFaces(InputStream sourceImage) {
+    public ResponseEntity<?> compareFaces(InputStream sourceImage, String s3Image) {
         RekognitionClient rekognitionClient = getRecClient();
+        Float similarityThreshold = 8F;
 
-
-        ListObjectsRequest listObjectsRequest = ListObjectsRequest
-                .builder()
-                .bucket(bucketName)
-                .build();
+        if(!isNumeric(s3Image) || Integer.parseInt(s3Image) > 41){
+            s3Image = "1";
+        }
 
         ResponseInputStream<GetObjectResponse> s3Object = S3Service.getClient().getObject(
                 GetObjectRequest.builder()
                         .bucket(bucketName)
-                        .key("1-0.png")
-                        .build());
+                        .key(s3Image + "-0.png")
+                        .build()
+        );
 
-        Float similarityThreshold = 70F;
         try {
-
-            int match = compareTwoFaces(rekognitionClient, similarityThreshold, sourceImage, s3Object);
-            listBucketObjects();
+            String match = compareTwoFaces(
+                    rekognitionClient,
+                    similarityThreshold,
+                    sourceImage,
+                    s3Object);
             return ResponseEntity.ok(match);
 
         } catch (RekognitionException e) {
@@ -89,7 +89,7 @@ public class CompareFaces {
     //Entender como pegar as fotos correspondentes do S3 a partir de algum identificador, podendo ser o nome da foto.
     //Em seguida pensar em uma maneira de ler a imagem sem baixar.
 
-    public static int compareTwoFaces(RekognitionClient rekClient, Float similarityThreshold, InputStream sourceImage, InputStream targetImage) {
+    public static String compareTwoFaces(RekognitionClient rekClient, Float similarityThreshold, InputStream sourceImage, InputStream targetImage) {
         try {
 
             SdkBytes sourceBytes = SdkBytes.fromInputStream(sourceImage);
@@ -110,33 +110,44 @@ public class CompareFaces {
                     .similarityThreshold(similarityThreshold)
                     .build();
 
-            // Compare the two images.
+            // Compare two images.
             CompareFacesResponse compareFacesResult = rekClient.compareFaces(facesRequest);
-//            List<CompareFacesMatch> faceDetails = compareFacesResult.faceMatches();
-//            String result = "Any face found";
-//            for (CompareFacesMatch match: faceDetails){
-//                ComparedFace face= match.face();
-//                BoundingBox position = face.boundingBox();
-//
-//                result = "Face at " + position.left().toString()
-//                        + " " + position.top()
-//                        + " matches with " + face.confidence().toString()
-//                        + "% confidence.";
-//            }
-//
-            List<ComparedFace> uncompared = compareFacesResult.unmatchedFaces();
-//            String uncomparedSize = "There was " + uncompared.size() + " face(s) that did not match";
-//            String sourceImage1 = "Source image rotation: " + compareFacesResult.sourceImageOrientationCorrection();
-//            String targetImage1 = "target image rotation: " + compareFacesResult.targetImageOrientationCorrection();
+            List<CompareFacesMatch> faceDetails = compareFacesResult.faceMatches();
+            String result = "Any face found";
 
-            return uncompared.size();
+            for (CompareFacesMatch match: faceDetails){
+                ComparedFace face = match.face();
+
+                result = "Matched Face with " + face.confidence() + "% confidence. " + "and with " + match.similarity() + " of similarity";
+            }
+
+            List<ComparedFace> unmatchedFaces = compareFacesResult.unmatchedFaces();
+            for (ComparedFace comparedFace: unmatchedFaces){
+                Float confidence = comparedFace.confidence();
+
+                result = "Unmatched Face with " + confidence + "% confidence.";
+            }
+
+            return result;
 
         } catch (RekognitionException e) {
             System.out.println("Failed to load source image " + sourceImage);
             System.exit(1);
-            return 0;
+            return "0";
 
         }
+    }
+
+    public static boolean isNumeric(String strNum) {
+        if (strNum == null) {
+            return false;
+        }
+        try {
+            double d = Double.parseDouble(strNum);
+        } catch (NumberFormatException nfe) {
+            return false;
+        }
+        return true;
     }
 
 }
